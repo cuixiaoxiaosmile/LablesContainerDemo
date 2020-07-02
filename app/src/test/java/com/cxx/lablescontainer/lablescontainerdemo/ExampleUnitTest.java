@@ -1,4 +1,4 @@
-package com.wuba.borrowfinancials.lablescontainerdemo;
+package com.cxx.lablescontainer.lablescontainerdemo;
 
 import org.junit.Test;
 
