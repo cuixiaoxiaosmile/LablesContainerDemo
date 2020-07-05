@@ -71,10 +71,9 @@ public class TablesLayoutView extends ViewGroup {
                 MarginLayoutParams marginLayoutParams = (MarginLayoutParams) child.getLayoutParams();
                 iChildWidth = marginLayoutParams.leftMargin + child.getMeasuredWidth() + marginLayoutParams.rightMargin;
                 iChildHeigh = marginLayoutParams.topMargin + child.getMeasuredHeight() + marginLayoutParams.bottomMargin;
-                if(iCurWidth + iChildWidth > measureWidth){
+                if(iCurWidth + iChildWidth > parentWidth){
                     //之前累加的宽度+当前子view的宽度>父控件的宽度时，要换行
                     listView.add(curHorView);
-                    curHorView.clear();
                     //保留行高后重新设置当前行高
                     measureHeigh += iCurHeigh;
                     listHeigh.add(iCurHeigh);
@@ -83,6 +82,7 @@ public class TablesLayoutView extends ViewGroup {
                     measureWidth = Math.max(measureWidth,iCurWidth);
                     //记录当前的行宽
                     iCurWidth = iChildWidth;
+                    curHorView = new ArrayList<>();
                     curHorView.add(child);
                 }else{
                     iCurWidth += iChildWidth;
@@ -90,17 +90,33 @@ public class TablesLayoutView extends ViewGroup {
                     curHorView.add(child);
                 }
             }
+            setMeasuredDimension(measureWidth,measureHeigh);
         }
-
     }
 
     @Override
     protected void onLayout(boolean b, int i, int i1, int i2, int i3) {
-
-    }
-
-    @Override
-    protected void onDraw(Canvas canvas) {
-        super.onDraw(canvas);
+        //当前view的位置值
+        int left,top,right,bottom;
+        //累计的左边距，累加的高度
+        int curLeft = 0,curTop = 0;
+        for(int index=0;index < listView.size();index++){
+            List<View> list = listView.get(index);
+            for(int j = 0;j < list.size();j++){
+                //找到当前view的位置信息
+                View view = list.get(j);
+                MarginLayoutParams marginLayoutParams = (MarginLayoutParams) view.getLayoutParams();
+                left = curLeft + marginLayoutParams.leftMargin;
+                top = curTop + marginLayoutParams.topMargin;
+                right = left + view.getMeasuredWidth();
+                bottom = top + view.getMeasuredHeight();
+                view.layout(left,top,right,bottom);
+                curLeft += view.getMeasuredWidth() + marginLayoutParams.leftMargin + marginLayoutParams.rightMargin;
+            }
+            curTop += listHeigh.get(index);
+            curLeft = 0;
+        }
+        listHeigh.clear();
+        listView.clear();
     }
 }
